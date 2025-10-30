@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+
+
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+terraform.tfvars
+.terraform.lock.hcl
+
+
+# Docker
+**/node_modules/
+*.log
+
+
+# misc
+.DS_Store
+
+
+# Ignore local kind images and provider binaries
+terraform-project/environments/dev/.terraform/
