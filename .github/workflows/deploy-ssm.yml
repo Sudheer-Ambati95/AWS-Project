@@ -1,0 +1,33 @@
+name: deploy-to-ec2
+on:
+workflow_dispatch:
+push:
+branches: [ main ]
+
+
+jobs:
+deploy:
+runs-on: ubuntu-latest
+permissions:
+id-token: write
+contents: read
+env:
+AWS_REGION: us-east-1
+IMAGE: ${{ secrets.DEPLOY_IMAGE }}
+INSTANCE_ID: ${{ secrets.EC2_INSTANCE_ID }}
+steps:
+- uses: actions/checkout@v4
+- name: Configure AWS
+uses: aws-actions/configure-aws-credentials@v4
+with:
+role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/GitHubActionsOIDCRole
+aws-region: ${{ env.AWS_REGION }}
+
+
+- name: Trigger SSM deploy
+run: |
+aws ssm send-command \
+--instance-ids "${{ env.INSTANCE_ID }}" \
+--document-name "AWS-RunShellScript" \
+--parameters commands=["docker pull $IMAGE","docker stop sample-app || true","docker rm sample-app || true","docker run -d --name sample-app -p 80:80 $IMAGE"] \
+--region ${{ env.AWS_REGION }}
